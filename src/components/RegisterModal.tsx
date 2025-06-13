@@ -1,123 +1,114 @@
 'use client'
 
 import React, { useState } from 'react'
+import { authService } from '@/services/auth'
 
 interface RegisterModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
-const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
+export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+
     if (password !== confirmPassword) {
-      alert('Пароли не совпадают')
+      setError('Passwords do not match')
       return
     }
-    console.log('Register attempt:', { email, password })
-    onClose()
+
+    setIsLoading(true)
+
+    try {
+      const { error } = await authService.signUp(email, password)
+      if (error) {
+        setError(error.message)
+      } else {
+        onClose()
+      }
+    } catch (err) {
+      setError('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (!isOpen) return null
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h2 className="modal-title">Регистрация</h2>
-          <button onClick={onClose} className="modal-close">
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="form-label">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-8 rounded-lg w-96">
+        <h2 className="text-2xl font-bold mb-4">Register</h2>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
               Email
             </label>
             <input
-              type="email"
               id="email"
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="form-input"
-              placeholder="Введите ваш email"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             />
           </div>
-
-          <div>
-            <label htmlFor="password" className="form-label">
-              Пароль
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+              Password
             </label>
             <input
-              type="password"
               id="password"
+              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="form-input"
-              placeholder="Придумайте пароль"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             />
           </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="form-label">
-              Подтвердите пароль
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirmPassword">
+              Confirm Password
             </label>
             <input
-              type="password"
               id="confirmPassword"
+              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="form-input"
-              placeholder="Повторите пароль"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             />
           </div>
-
-          <div className="flex items-center">
-            <input
-              id="terms"
-              name="terms"
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              required
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-              Я согласен с{' '}
-              <a
-                href="#"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                условиями использования
-              </a>
-            </label>
+          <div className="flex items-center justify-between">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              {isLoading ? 'Loading...' : 'Register'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              Cancel
+            </button>
           </div>
-
-          <button type="submit" className="btn-primary">
-            Зарегистрироваться
-          </button>
         </form>
       </div>
     </div>
   )
-}
-
-export default RegisterModal 
+} 

@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 const About = () => {
   return (
     <section id="about" className="py-20 bg-gray-50 scroll-mt-16">
@@ -15,10 +17,12 @@ const About = () => {
           {/* Left side - Image */}
           <div className="relative">
             <div className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-xl">
-              <img
-                src="/images/about-image.jpg"
-                alt="Человек слушает аудиокнигу"
-                className="object-cover w-full h-full"
+              <Image
+                src="/images/about/about-image.jpg"
+                alt="About AudioBooks"
+                width={500}
+                height={300}
+                className="rounded-lg shadow-lg"
               />
             </div>
             <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-xl shadow-lg">
